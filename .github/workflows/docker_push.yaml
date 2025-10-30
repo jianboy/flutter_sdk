@@ -1,0 +1,29 @@
+name: Docker Push Minimal
+
+on:
+  push:
+    branches: [main]   # 只在 main 分支触发，可按需修改
+
+permissions:
+  packages: write    # 必须，否则 push 会 403
+  contents: read
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ 拉取仓库
+      - uses: actions/checkout@v4
+
+      # 2️⃣ 登录 GHCR
+      - name: Login to GHCR
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      # 3️⃣ Build 镜像
+      - name: Build Docker image
+        run: docker build -t ghcr.io/jianboy/flutter_sdk:latest .
+
+      # 4️⃣ Push 镜像
+      - name: Push Docker image
+        run: docker push ghcr.io/jianboy/flutter_sdk:latest
